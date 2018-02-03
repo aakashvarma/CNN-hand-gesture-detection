@@ -1,18 +1,18 @@
 import os
-import cv2
 import numpy as np
-import matplotlib.pyplot as plt
+from PIL import Image
 
-# path = '.\dataset'
-filename = 'iiiok2.png'
+path2 = './leapmotion_dataset'
+imlist = os.listdir(path2)
+    
+image1 = np.array(Image.open(path2 +'/' + imlist[0])) 
 
-# for filename in os.listdir(path):
+m,n = image1.shape[0:2] 
+total_images = len(imlist) 
 
-img = cv2.imread(filename,1)
-arr = np.array(img)
-cv2.imshow('image',img)
-k = cv2.waitKey(0)
-print (filename)
-if k == 27:       
-    cv2.destroyAllWindows()
+immatrix = np.array([np.array(Image.open(path2+ '/' + images).convert('L')).flatten()
+                        for images in imlist], dtype = 'f')
 
+
+
+print (immatrix.shape)
