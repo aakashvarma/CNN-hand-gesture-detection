@@ -6,6 +6,7 @@ import urllib
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+from sklearn.utils import shuffle
 from urllib.request import urlopen
 from matplotlib import pyplot as plt
 from sklearn.cross_validation import train_test_split
@@ -90,6 +91,9 @@ y_ = tf.nn.softmax(dense_layer2)
 #%%
 
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits = dense_layer2, labels = y))
+os.chdir("D:\Coding\CNN-hand-gesture-detection")
+print (os.getcwd())
+
 
 #%%
 
@@ -118,14 +122,13 @@ def modlistdir(path):
 
     print (immatrix.shape)
 
-    raw_input("Press any key")
         
     label=np.ones((total_images,),dtype = int)
 
-    samples_per_class = total_images / nb_classes
+    samples_per_class = int(total_images / nb_classes)
     print ("samples_per_class - ",samples_per_class)
     s = 0
-    r = samples_per_class
+    r = int(samples_per_class)
     for classIndex in range(nb_classes):
         label[s:r] = classIndex
         s = r
@@ -136,6 +139,8 @@ def modlistdir(path):
     train_data = [data,Label]
         
     (X, Y) = (train_data[0],train_data[1])
+
+    print (total_images)
         
         
     # Spltting
@@ -175,13 +180,10 @@ with tf.Session() as sess:
         for i in range(total_batch):
             batch_x = tf.train.batch(X_train, batch_size=batch_size)
             batch_y = tf.train.batch(Y_train, batch_size=batch_size)
-            _, c = sess.run([optimiser, cross_entropy], 
-                            feed_dict={x: batch_x, y: batch_y})
+            _, c = sess.run([optimiser, cross_entropy], feed_dict={x: batch_x, y: batch_y})
             avg_cost += c / total_batch
-        test_acc = sess.run(accuracy, 
-                       feed_dict={x: X_test, y: y_test})
-        print("Epoch:", (epoch + 1), "cost =", "{:.3f}".format(avg_cost), " 
-                 test accuracy: {:.3f}".format(test_acc))
+        test_acc = sess.run(accuracy, feed_dict={x: X_test, y: y_test})
+        print("Epoch:", (epoch + 1), "cost =", "{:.3f}".format(avg_cost), "test accuracy: {:.3f}".format(test_acc))
 
     print("\nTraining complete!")
     print(sess.run(accuracy, feed_dict={x: X_test, y: Y_test}))

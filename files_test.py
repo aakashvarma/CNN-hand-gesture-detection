@@ -29,14 +29,12 @@ immatrix = np.array([np.array(Image.open(path2+ '/' + images).convert('L')).flat
 
 print (immatrix.shape)
 
-raw_input("Press any key")
-    
 label=np.ones((total_images,),dtype = int)
 
-samples_per_class = total_images / nb_classes
+samples_per_class = int(total_images / nb_classes)
 print "samples_per_class - ",samples_per_class
 s = 0
-r = samples_per_class
+r = int(samples_per_class)
 for classIndex in range(nb_classes):
     label[s:r] = classIndex
     s = r
