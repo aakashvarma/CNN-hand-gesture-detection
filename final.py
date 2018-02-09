@@ -105,62 +105,61 @@ def modlistdir(path):
             continue
         retlist.append(name)
     return retlist
+    
 
 
-    path2 = './leapmotion_dataset'
-    imlist = modlistdir(path2)
-        
-    image1 = np.array(Image.open(path2 +'/' + imlist[0])) 
+path2 = './leapmotion_dataset'
+imlist = modlistdir(path2)
 
-    m,n = image1.shape[0:2] 
-    total_images = len(imlist) 
+image1 = np.array(Image.open(path2 +'/' + imlist[0])) 
 
-    immatrix = np.array([np.array(Image.open(path2+ '/' + images).convert('L')).flatten()
-                            for images in imlist], dtype = 'f')
+m,n = image1.shape[0:2] 
+total_images = len(imlist) 
 
-
-
-    print (immatrix.shape)
-
-        
-    label=np.ones((total_images,),dtype = int)
-
-    samples_per_class = int(total_images / nb_classes)
-    print ("samples_per_class - ",samples_per_class)
-    s = 0
-    r = int(samples_per_class)
-    for classIndex in range(nb_classes):
-        label[s:r] = classIndex
-        s = r
-        r = s + samples_per_class
+immatrix = np.array([np.array(Image.open(path2+ '/' + images).convert('L')).flatten()
+                        for images in imlist], dtype = 'f')
 
 
-    data,Label = shuffle(immatrix,label, random_state=2)
-    train_data = [data,Label]
-        
-    (X, Y) = (train_data[0],train_data[1])
 
-    print (total_images)
-        
-        
-    # Spltting
-        
-    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=4)
-        
-    X_train = X_train.reshape(X_train.shape[0], img_channels, img_rows, img_cols)
-    X_test = X_test.reshape(X_test.shape[0], img_channels, img_rows, img_cols)
-        
-    X_train = X_train.astype('float32')
-    X_test = X_test.astype('float32')
-        
-    # normalize
-    X_train /= 255
-    X_test /= 255
-        
-    # convert class vectors to binary class matrices
-    Y_train = np_utils.to_categorical(y_train, nb_classes)
-    Y_test = np_utils.to_categorical(y_test, nb_classes)
-    return X_train, X_test, Y_train, Y_test
+print (immatrix.shape)
+
+label=np.ones((total_images,),dtype = int)
+
+samples_per_class = int(total_images / nb_classes)
+print ("samples_per_class - ",samples_per_class)
+s = 0
+r = int(samples_per_class)
+for classIndex in range(nb_classes):
+    label[s:r] = classIndex
+    s = r
+    r = s + samples_per_class
+
+
+data,Label = shuffle(immatrix,label, random_state=2)
+train_data = [data,Label]
+
+(X, Y) = (train_data[0],train_data[1])
+
+
+# Spltting
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=4)
+
+X_train = X_train.reshape(X_train.shape[0], img_channels, img_rows, img_cols)
+X_test = X_test.reshape(X_test.shape[0], img_channels, img_rows, img_cols)
+
+X_train = X_train.astype('float32')
+X_test = X_test.astype('float32')
+
+# normalize
+X_train /= 255
+X_test /= 255
+
+# convert class vectors to binary class matrices
+# Y_train = np_utils.to_categorical(y_train, nb_classes)
+# Y_test = np_utils.to_categorical(y_test, nb_classes)
+# return X_train, X_test, Y_train, Y_test
+
 
 
 #%%
@@ -175,19 +174,18 @@ init_op = tf.global_variables_initializer()
 with tf.Session() as sess:
     sess.run(init_op)
     total_batch = int(total_images / batch_size)
-    for epoch in range(epochs):
+    for epoch in range(nb_epoch):
         avg_cost = 0
         for i in range(total_batch):
-            batch_x = tf.train.batch(X_train, batch_size=batch_size)
-            batch_y = tf.train.batch(Y_train, batch_size=batch_size)
+            batch_x = tf.train.batch(list(X_train), batch_size=batch_size)
+            batch_y = tf.train.batch(list(Y_train), batch_size=batch_size)
             _, c = sess.run([optimiser, cross_entropy], feed_dict={x: batch_x, y: batch_y})
             avg_cost += c / total_batch
-        test_acc = sess.run(accuracy, feed_dict={x: X_test, y: y_test})
+        test_acc = sess.run(accuracy, feed_dict={x: X_test, y: Y_test})
         print("Epoch:", (epoch + 1), "cost =", "{:.3f}".format(avg_cost), "test accuracy: {:.3f}".format(test_acc))
 
     print("\nTraining complete!")
     print(sess.run(accuracy, feed_dict={x: X_test, y: Y_test}))
-
 
 
 
